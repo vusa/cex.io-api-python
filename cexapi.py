@@ -7,8 +7,7 @@
 import hmac
 import hashlib
 import time
-import urllib
-import urllib2
+import urllib.request, urllib.parse, urllib.error
 import json
 
 class api:
@@ -30,13 +29,15 @@ class api:
  ##generate segnature
  def __signature(self):
   string = self.__nonce_v + self.__username + self.__api_key ##create string
-  signature = hmac.new(self.__api_secret, string, digestmod=hashlib.sha256).hexdigest().upper() ##create signature
+  signature = hmac.new(self.__api_secret.encode('utf-8'), string.encode('utf-8'), digestmod=hashlib.sha256).hexdigest().upper() ##create signature
   return signature
 
  def __post(self, url, param): ##Post Request (Low Level API call)
-  params = urllib.urlencode(param)
-  req = urllib2.Request(url, params, {'User-agent': 'bot-cex.io-'+self.__username})
-  page = urllib2.urlopen(req).read()
+  params = urllib.parse.urlencode(param)
+  params_encoded = params.encode('utf-8')
+  req = urllib.request.Request(url)
+  req.add_header('User-agent', 'bot-cex.io-'+self.__username)
+  page = urllib.request.urlopen(req, params_encoded).read().decode('utf-8')
   return page;
  
  def api_call(self, method, param = {}, private = 0, couple = ''): ## api call (Middle level)
